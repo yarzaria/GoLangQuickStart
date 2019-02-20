@@ -1,0 +1,30 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  artifacts:
+  - image: changeme
+    context: .
+    docker: {}
+  tagPolicy:
+    envTemplate:
+      template: '{{.DOCKER_REGISTRY}}/yarzaria/golangquickstart:{{.VERSION}}'
+  local: {}
+deploy:
+  kubectl: {}
+profiles:
+- name: dev
+  build:
+    artifacts:
+    - docker: {}
+    tagPolicy:
+      envTemplate:
+        template: '{{.DOCKER_REGISTRY}}/yarzaria/golangquickstart:{{.DIGEST_HEX}}'
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: golangquickstart
+        chartPath: charts/golangquickstart
+        setValueTemplates:
+          image.repository: '{{.DOCKER_REGISTRY}}/yarzaria/golangquickstart'
+          image.tag: '{{.DIGEST_HEX}}'
